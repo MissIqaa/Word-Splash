@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WORD SPLASH! — Vocabulary Light Show</title>
+    <!-- Tailwind CSS for layout utility -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for playful bubble typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Styles & Color Palette based on screenshot */
+        :root {
+            --bg-dark: #17113a;
+            --panel-dark: #29194f;
+            --neon-purple: #a855f7;
+            --pink-main: #ff4f9a;
+            --yellow-main: #ffd84d;
+            --cyan-main: #6de6ff;
+            --green-main: #b9ff70;
+            --lavender-main: #c6a4ff;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Fredoka', cursive, sans-serif;
+            color: white;
+            overflow-x: hidden;
+            user-select: none;
+            min-height: 100vh;
+        }
+
+        /* Ambient Glow & Background Splash Decorative Elements */
+        .splash-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .splash-vector {
+            position: absolute;
+            filter: blur(10px);
+            opacity: 0.85;
+            transition: all 0.5s ease;
+        }
+
+        /* 3D Bubble Text Styling */
+        .bubble-text-title {
+            font-family: 'Fredoka', cursive;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #FFF 10%, #FFD84D 35%, #FF4F9A 70%, #9333EA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 6px 0px #11092b) drop-shadow(0px 0px 15px rgba(255, 79, 154, 0.6));
+        }
+
+        .bubble-letter {
+            display: inline-block;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 0 0.1em;
+            line-height: 1.1;
+            filter: drop-shadow(0px 6px 0px #150a30) drop-shadow(0px 8px 12px rgba(0,0,0,0.5));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        /* Glossy Highlights on letters */
+        .bubble-letter::after {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 20%;
+            width: 25%;
+            height: 25%;
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+
+        /* Letter Color Variants for Scrambled Word */
+        .letter-color-0 { color: #ff4f9a; }
+        .letter-color-1 { color: #6de6ff; }
+        .letter-color-2 { color: #ffd84d; }
+        .letter-color-3 { color: #b9ff70; }
+        .letter-color-4 { color: #c6a4ff; }
+        .letter-color-5 { color: #ff8e4d; }
+
+        .letter-correct {
+            color: #ffd84d;
+            text-shadow: 0 0 20px rgba(255, 216, 77, 0.6);
+        }
+
+        /* Glowing Main Frame */
+        .main-display-panel {
+            background-color: var(--panel-dark);
+            border: 3.5px solid #8b5cf6;
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.5), inset 0 0 20px rgba(139, 92, 246, 0.2);
+            position: relative;
+        }
+
+        /* Neon Arcade Buttons */
+        .btn-arcade {
+            font-family: 'Fredoka', cursive;
+            font-weight: 800;
+            border-radius: 9999px;
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.4), 0 0 15px rgba(255,255,255,0.2);
+            position: relative;
+            top: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-arcade:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-arcade:active {
+            top: 4px;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+        }
+
+        .btn-pink { background: linear-gradient(180deg, #ff73b3 0%, #ff4f9a 100%); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .btn-purple { background: linear-gradient(180deg, #a770ff 0%, #7c3aed 100%); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .btn-cyan { background: linear-gradient(180deg, #74efff 0%, #06b6d4 100%); color: #082f49; text-shadow: 0 1px 2px rgba(255,255,255,0.4); }
+        .btn-yellow { background: linear-gradient(180deg, #ffea79 0%, #eab308 100%); color: #422006; text-shadow: 0 1px 2px rgba(255,255,255,0.4); }
+
+        /* Timer Badge */
+        .timer-badge {
+            background-color: #1f143d;
+            border: 2px solid #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(3deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes shuffleBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.08) rotate(4deg); }
+        }
+
+        .animate-pop {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .animate-bounce-letter {
+            animation: shuffleBounce 0.6s infinite ease-in-out;
+        }
+
+        /* Floating Stars */
+        .star-sparkle {
+            position: absolute;
+            animation: floatSparkle 3s infinite ease-in-out alternate;
+        }
+
+        @keyframes floatSparkle {
+            0% { transform: translateY(0px) rotate(0deg) scale(0.9); opacity: 0.7; }
+            100% { transform: translateY(-10px) rotate(20deg) scale(1.1); opacity: 1; }
+        }
+
+        /* Scrollbar styling for modals */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e133d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen p-3 md:p-6 relative select-none">
+
+    <!-- AUDIO ELEMENT -->
+    <audio id="bgm" src="./bgm.mp3" loop preload="auto"></audio>
+
+    <!-- DECORATIVE BACKGROUND SPLASH VECTORS & SPARKLES -->
+    <div class="splash-bg">
+        <!-- Top Left Splash -->
+        <svg class="splash-vector -top-10 -left-10 w-48 md:w-80 h-48 md:h-80" viewBox="0 0 200 200" fill="none">
+            <path d="M40,20 Q80,10 110,50 Q140,90 90,130 Q40,170 20,110 Q0,50 40,20 Z" fill="url(#grad1)" />
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff4f9a;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.2" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <!-- Bottom Left Splash -->
+        <svg class="splash-vector -bottom-12 -left-12 w-56 md:w-96 h-56 md:h-96" viewBox="0 0 200 200">
+            <path d="M20,60 Q90,0 150,50 Q200,110 130,160 Q60,200 10,140 Q-20,90 20,60 Z" fill="url(#grad2)" />
+            <defs>
+                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffd84d;stop-opacity:0.5" />
+                    <stop offset="100%" style="stop-color:#b9ff70;stop-opacity:0.2" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <!-- Right Splashes -->
+        <svg class="splash-vector -top-10 -right-10 w-48 md:w-80 h-48 md:h-80" viewBox="0 0 200 200">
+            <path d="M50,10 Q120,30 140,90 Q160,150 90,170 Q20,190 10,120 Q0,50 50,10 Z" fill="url(#grad3)" />
+            <defs>
+                <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#6de6ff;stop-opacity:0.6" />
+                    <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.2" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <!-- Sparkle Icons scattered -->
+        <i class="fa-solid fa-star text-yellow-300 text-xl md:text-3xl star-sparkle top-12 left-1/4"></i>
+        <i class="fa-solid fa-sparkles text-pink-400 text-2xl md:text-4xl star-sparkle top-24 right-1/4" style="animation-delay: 1s;"></i>
+        <i class="fa-solid fa-star text-cyan-300 text-lg md:text-2xl star-sparkle bottom-20 left-1/3" style="animation-delay: 1.5s;"></i>
+        <i class="fa-solid fa-star text-green-300 text-xl md:text-3xl star-sparkle bottom-16 right-1/3" style="animation-delay: 0.5s;"></i>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="relative z-10 max-w-6xl mx-auto w-full flex flex-col justify-between flex-grow gap-4">
+
+        <!-- HEADER SECTION -->
+        <header class="flex flex-row items-center justify-between w-full pt-2 px-2">
+            <!-- Left Decorative Spacer for balance -->
+            <div class="hidden sm:flex items-center gap-2 opacity-80">
+                <i class="fa-solid fa-star text-yellow-400 text-2xl"></i>
+            </div>
+
+            <!-- Central Title & Subtitle -->
+            <div class="text-center flex-grow">
+                <div class="flex items-center justify-center gap-2 md:gap-4">
+                    <i class="fa-solid fa-star text-yellow-300 text-2xl md:text-4xl animate-pulse"></i>
+                    <h1 class="bubble-text-title text-3xl sm:text-5xl md:text-6xl tracking-wider">WORD SPLASH!</h1>
+                    <i class="fa-solid fa-star text-yellow-300 text-2xl md:text-4xl animate-pulse"></i>
+                </div>
+                <p class="text-xs sm:text-sm md:text-base font-extrabold tracking-widest text-[#c6a4ff] uppercase mt-0.5">
+                    VOCABULARY LIGHT SHOW
+                </p>
+            </div>
+
+            <!-- Right Digital Countdown Timer -->
+            <div class="flex items-center">
+                <div class="timer-badge px-3 py-1.5 md:px-5 md:py-2.5 rounded-2xl flex items-center gap-2 md:gap-3">
+                    <i class="fa-regular fa-clock text-cyan-300 text-xl md:text-3xl"></i>
+                    <div class="flex flex-col text-left">
+                        <span class="text-[9px] md:text-xs font-black text-cyan-200 uppercase tracking-wider leading-none">TIME LEFT</span>
+                        <span id="timerDisplay" class="text-lg md:text-2xl font-black text-white font-mono leading-none mt-0.5">00:10</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN WORD DISPLAY PANEL -->
+        <main class="main-display-panel rounded-3xl p-4 sm:p-8 md:p-10 my-2 text-center flex flex-col justify-center items-center min-h-[320px] sm:min-h-[400px] md:min-h-[440px] relative overflow-hidden">
+            
+            <!-- Top Center Glowing Neon Dots (5 colors) -->
+            <div class="flex justify-center items-center gap-3 mb-4 sm:mb-6">
+                <span class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#ff4f9a] shadow-[0_0_10px_#ff4f9a]"></span>
+                <span class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#ffd84d] shadow-[0_0_10px_#ffd84d]"></span>
+                <span class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#6de6ff] shadow-[0_0_10px_#6de6ff]"></span>
+                <span class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#b9ff70] shadow-[0_0_10px_#b9ff70]"></span>
+                <span class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#c6a4ff] shadow-[0_0_10px_#c6a4ff]"></span>
+            </div>
+
+            <!-- Decorative Star Elements inside Panel -->
+            <i class="fa-solid fa-star text-yellow-300 text-2xl sm:text-3xl absolute top-8 left-8 opacity-80"></i>
+            <i class="fa-solid fa-star text-yellow-300 text-2xl sm:text-3xl absolute top-12 right-8 opacity-80"></i>
+
+            <!-- SECTION 1: SCRAMBLED WORD -->
+            <div class="w-full mb-3 sm:mb-5">
+                <h2 class="text-xs sm:text-sm md:text-base font-black text-[#6de6ff] tracking-widest uppercase mb-1 sm:mb-2">
+                    SCRAMBLED WORD
+                </h2>
+                <!-- Container for Scrambled Word Bubble Letters -->
+                <div id="scrambledContainer" class="flex flex-wrap justify-center items-center gap-1 sm:gap-2.5 min-h-[60px] sm:min-h-[80px] px-2">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- NEON PURPLE DIVIDER LINE -->
+            <div class="w-full max-w-3xl h-[2px] bg-gradient-to-r from-transparent via-[#a855f7] to-transparent my-3 sm:my-5 shadow-[0_0_8px_#a855f7]"></div>
+
+            <!-- SECTION 2: CORRECT SPELLING -->
+            <div class="w-full mb-4 sm:mb-6">
+                <h2 class="text-xs sm:text-sm md:text-base font-black text-[#6de6ff] tracking-widest uppercase mb-1 sm:mb-2">
+                    CORRECT SPELLING
+                </h2>
+                <!-- Container for Correct Spelling Bubble Letters -->
+                <div id="correctContainer" class="flex flex-wrap justify-center items-center gap-1 sm:gap-2.5 min-h-[60px] sm:min-h-[80px] px-2">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- BOTTOM TAGLINE -->
+            <div class="mt-2 text-xs sm:text-sm md:text-base font-semibold text-white/90 tracking-wide flex items-center justify-center gap-2">
+                <span>✨</span>
+                <span class="italic">Amazing words, brilliant minds!</span>
+                <span>✨</span>
+            </div>
+        </main>
+
+        <!-- MAIN CONTROLS ROW (Matching screenshot design & colors) -->
+        <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5 w-full">
+            <button id="btnStart" onclick="startGame()" class="btn-arcade btn-pink py-3.5 md:py-4 px-4 text-base md:text-lg">
+                <i class="fa-solid fa-play text-lg md:text-xl"></i>
+                <span>START</span>
+            </button>
+            <button id="btnPause" onclick="togglePause()" class="btn-arcade btn-purple py-3.5 md:py-4 px-4 text-base md:text-lg">
+                <i id="pauseIcon" class="fa-solid fa-pause text-lg md:text-xl"></i>
+                <span id="pauseLabel">PAUSE</span>
+            </button>
+            <button id="btnRestart" onclick="restartGame()" class="btn-arcade btn-cyan py-3.5 md:py-4 px-4 text-base md:text-lg">
+                <i class="fa-solid fa-rotate-right text-lg md:text-xl"></i>
+                <span>RESTART</span>
+            </button>
+            <button id="btnSettings" onclick="openSettingsModal()" class="btn-arcade btn-yellow py-3.5 md:py-4 px-4 text-base md:text-lg">
+                <i class="fa-solid fa-gear text-lg md:text-xl"></i>
+                <span>TEACHER SETTINGS</span>
+            </button>
+        </section>
+
+        <!-- EXTRA TOOLBAR: NAVIGATION, MUSIC CONTROL & FULLSCREEN -->
+        <section class="bg-[#1f143d]/90 border border-purple-500/40 rounded-2xl p-2.5 sm:p-3 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+            <!-- Word Navigation -->
+            <div class="flex items-center gap-2">
+                <button onclick="prevWord()" class="px-3 py-1.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-400/30 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-backward-step"></i>
+                    <span class="hidden sm:inline">Prev Word</span>
+                </button>
+                <span id="wordProgressText" class="font-mono font-bold text-cyan-300 px-2">Word 1 of 10</span>
+                <button onclick="nextWord()" class="px-3 py-1.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-400/30 flex items-center gap-1.5 transition">
+                    <span class="hidden sm:inline">Next Word</span>
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+            </div>
+
+            <!-- Music Controls -->
+            <div class="flex items-center gap-3">
+                <button id="btnBGM" onclick="toggleBGM()" class="px-3.5 py-1.5 rounded-xl bg-pink-900/40 hover:bg-pink-800/60 text-pink-200 border border-pink-500/40 flex items-center gap-2 font-bold transition">
+                    <i id="bgmIcon" class="fa-solid fa-music"></i>
+                    <span>BGM: <span id="bgmStatusText">OFF</span></span>
+                </button>
+
+                <div class="hidden md:flex items-center gap-2 bg-purple-950/60 px-3 py-1 rounded-xl border border-purple-800/50">
+                    <i class="fa-solid fa-volume-low text-purple-300 text-xs"></i>
+                    <input id="volumeSlider" type="range" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume(this.value)" class="w-20 accent-pink-500 cursor-pointer h-1.5 bg-purple-900 rounded-lg">
+                </div>
+            </div>
+
+            <!-- Fullscreen Toggle -->
+            <div>
+                <button onclick="toggleFullscreen()" class="px-3 py-1.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-400/30 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-expand"></i>
+                    <span class="hidden sm:inline">Fullscreen</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- TEACHER BOTTOM QUICK BAR (Matching reference bar style) -->
+        <footer class="bg-[#1a1136] border border-purple-500/30 rounded-2xl p-2.5 sm:p-3 text-xs sm:text-sm text-purple-200 flex flex-wrap items-center justify-around gap-2 text-center">
+            <button onclick="openSettingsTab('edit')" class="flex items-center gap-1.5 hover:text-cyan-300 transition py-1 px-2 rounded-lg hover:bg-purple-900/40">
+                <i class="fa-solid fa-star text-yellow-400"></i> Edit Words
+            </button>
+            <div class="hidden sm:block w-[1px] h-4 bg-purple-700/50"></div>
+            <button onclick="openSettingsTab('add')" class="flex items-center gap-1.5 hover:text-cyan-300 transition py-1 px-2 rounded-lg hover:bg-purple-900/40">
+                <i class="fa-solid fa-circle-plus text-pink-400"></i> Add / Remove
+            </button>
+            <div class="hidden sm:block w-[1px] h-4 bg-purple-700/50"></div>
+            <button onclick="openSettingsTab('reorder')" class="flex items-center gap-1.5 hover:text-cyan-300 transition py-1 px-2 rounded-lg hover:bg-purple-900/40">
+                <i class="fa-solid fa-list-check text-green-400"></i> Reorder
+            </button>
+            <div class="hidden sm:block w-[1px] h-4 bg-purple-700/50"></div>
+            <button onclick="openSettingsTab('bulk')" class="flex items-center gap-1.5 hover:text-cyan-300 transition py-1 px-2 rounded-lg hover:bg-purple-900/40">
+                <i class="fa-solid fa-file-lines text-purple-300"></i> Bulk Import
+            </button>
+            <div class="hidden sm:block w-[1px] h-4 bg-purple-700/50"></div>
+            <button onclick="openSettingsTab('timing')" class="flex items-center gap-1.5 hover:text-cyan-300 transition py-1 px-2 rounded-lg hover:bg-purple-900/40">
+                <i class="fa-solid fa-sliders text-cyan-300"></i> Customise Settings
+            </button>
+            <div class="hidden sm:block w-[1px] h-4 bg-purple-700/50"></div>
+            <button onclick="saveAndToast()" class="flex items-center gap-1.5 hover:text-cyan-300 transition py-1 px-2 rounded-lg hover:bg-purple-900/40">
+                <i class="fa-solid fa-floppy-disk text-yellow-300"></i> Save Changes
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- TEACHER SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 hidden">
+        <div class="bg-[#211642] border-2 border-purple-500 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="bg-[#170e30] p-4 md:p-5 border-b border-purple-500/40 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-gear text-yellow-400 text-2xl"></i>
+                    <h2 class="text-xl md:text-2xl font-black text-white">TEACHER SETTINGS</h2>
+                </div>
+                <button onclick="closeSettingsModal()" class="text-purple-300 hover:text-white text-2xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Navigation Tabs -->
+            <div class="flex bg-[#1d123b] border-b border-purple-500/30 overflow-x-auto text-xs sm:text-sm font-bold">
+                <button onclick="switchTab('edit')" id="tabBtn-edit" class="tab-btn px-4 py-3 text-purple-300 border-b-2 border-transparent hover:text-cyan-300 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-[#fa-list]"></i> Word List & Edit
+                </button>
+                <button onclick="switchTab('bulk')" id="tabBtn-bulk" class="tab-btn px-4 py-3 text-purple-300 border-b-2 border-transparent hover:text-cyan-300 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-import"></i> Bulk Import
+                </button>
+                <button onclick="switchTab('timing')" id="tabBtn-timing" class="tab-btn px-4 py-3 text-purple-300 border-b-2 border-transparent hover:text-cyan-300 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-clock"></i> Timers & Display
+                </button>
+                <button onclick="switchTab('audio')" id="tabBtn-audio" class="tab-btn px-4 py-3 text-purple-300 border-b-2 border-transparent hover:text-cyan-300 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-music"></i> Audio Diagnostics
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-4 md:p-6 overflow-y-auto flex-grow space-y-6">
+                
+                <!-- TAB 1: WORD LIST & EDIT -->
+                <div id="tabContent-edit" class="tab-content space-y-4">
+                    <!-- Add Individual Word -->
+                    <div class="flex gap-2">
+                        <input id="newWordInput" type="text" placeholder="Type a new word or phrase..." class="flex-grow bg-[#150c2b] border border-purple-500/50 rounded-xl px-4 py-2.5 text-white placeholder-purple-400 focus:outline-none focus:border-cyan-400 font-bold">
+                        <button onclick="addSingleWord()" class="btn-arcade btn-pink px-5 py-2.5 text-sm">
+                            <i class="fa-solid fa-plus"></i> Add
+                        </button>
+                    </div>
+
+                    <!-- List of Words -->
+                    <div class="bg-[#170e30] border border-purple-500/30 rounded-2xl p-3 max-h-60 overflow-y-auto divide-y divide-purple-900/50" id="modalWordList">
+                        <!-- Rendered via JS -->
+                    </div>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="flex flex-wrap justify-between items-center gap-2 pt-2">
+                        <button onclick="restoreDefaultWords()" class="px-3.5 py-2 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 text-xs font-bold border border-purple-500/30">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Restore Sample List
+                        </button>
+                        <button onclick="confirmClearWords()" class="px-3.5 py-2 rounded-xl bg-red-900/60 hover:bg-red-800 text-red-200 text-xs font-bold border border-red-500/30">
+                            <i class="fa-solid fa-trash mr-1"></i> Clear All Words
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: BULK IMPORT -->
+                <div id="tabContent-bulk" class="tab-content space-y-4 hidden">
+                    <p class="text-xs text-purple-300">Paste your vocabulary list below. Put each word or phrase on a separate line:</p>
+                    <textarea id="bulkInput" rows="8" placeholder="beautiful&#10;adventure&#10;celebrate&#10;wonderful" class="w-full bg-[#150c2b] border border-purple-500/50 rounded-xl p-4 text-white font-mono text-sm placeholder-purple-500 focus:outline-none focus:border-cyan-400"></textarea>
+                    <button onclick="processBulkImport()" class="btn-arcade btn-cyan py-2.5 px-6 text-sm">
+                        <i class="fa-solid fa-file-import"></i> Process & Save List
+                    </button>
+                </div>
+
+                <!-- TAB 3: TIMERS & DISPLAY SETTINGS -->
+                <div id="tabContent-timing" class="tab-content space-y-5 hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-[#170e30] p-4 rounded-2xl border border-purple-500/30">
+                            <label class="block text-xs font-bold text-cyan-300 uppercase mb-2">Scrambled Phase Duration</label>
+                            <div class="flex items-center gap-3">
+                                <input id="scrambleTimeInput" type="number" min="1" max="30" value="3" class="w-20 bg-[#150c2b] border border-purple-500/50 rounded-xl p-2 text-center font-bold text-white">
+                                <span class="text-sm text-purple-200">seconds</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#170e30] p-4 rounded-2xl border border-purple-500/30">
+                            <label class="block text-xs font-bold text-yellow-300 uppercase mb-2">Correct Phase Duration</label>
+                            <div class="flex items-center gap-3">
+                                <input id="correctTimeInput" type="number" min="1" max="60" value="7" class="w-20 bg-[#150c2b] border border-purple-500/50 rounded-xl p-2 text-center font-bold text-white">
+                                <span class="text-sm text-purple-200">seconds</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#170e30] p-4 rounded-2xl border border-purple-500/30 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold text-white">Loop Vocabulary List Continuously</span>
+                            <input id="loopToggle" type="checkbox" checked class="w-5 h-5 accent-pink-500 cursor-pointer">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold text-white">Auto-Advance to Next Word</span>
+                            <input id="autoAdvanceToggle" type="checkbox" checked class="w-5 h-5 accent-pink-500 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: AUDIO DIAGNOSTICS & HELP -->
+                <div id="tabContent-audio" class="tab-content space-y-4 hidden">
+                    <div class="bg-[#170e30] p-4 rounded-2xl border border-purple-500/30 space-y-3">
+                        <h3 class="font-bold text-cyan-300 text-sm">Background Music Status</h3>
+                        <p class="text-xs text-purple-200">Target File Path: <code class="bg-black/40 px-2 py-0.5 rounded text-pink-300">./bgm.mp3</code></p>
+                        
+                        <div id="audioStatusBadge" class="p-3 rounded-xl bg-purple-950 text-xs font-mono flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-cyan-400"></i>
+                            <span id="audioDiagnosticMsg">Checking audio status...</span>
+                        </div>
+
+                        <div class="pt-2 flex items-center gap-4">
+                            <label class="text-xs font-bold text-purple-200">Default Music Volume:</label>
+                            <input id="settingVolumeSlider" type="range" min="0" max="1" step="0.05" value="0.3" oninput="adjustVolume(this.value)" class="w-32 accent-pink-500 cursor-pointer">
+                            <span id="volumePercent" class="text-xs font-mono font-bold text-yellow-300">30%</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-purple-900/30 border border-purple-500/20 rounded-xl text-xs text-purple-300">
+                        <i class="fa-solid fa-circle-exclamation text-yellow-400 mr-1"></i>
+                        Note: For background music to play, place your <code class="text-white">bgm.mp3</code> audio file in the exact same directory folder as this HTML file. If missing, the game will remain 100% playable in silent mode.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-[#170e30] p-4 border-t border-purple-500/40 flex justify-end gap-3">
+                <button onclick="closeSettingsModal()" class="px-5 py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 text-sm font-bold border border-purple-500/30">
+                    Cancel
+                </button>
+                <button onclick="saveSettingsModal()" class="btn-arcade btn-pink py-2.5 px-6 text-sm">
+                    <i class="fa-solid fa-check"></i> Save & Apply
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-purple-900 border-2 border-pink-500 text-white px-5 py-3 rounded-2xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 font-bold text-sm pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-pink-400 text-lg"></i>
+        <span id="toastMsg">Settings Saved!</span>
+    </div>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        // DEFAULT SAMPLE VOCABULARY
+        const DEFAULT_WORDS = [
+            "beautiful",
+            "adventure",
+            "celebrate",
+            "wonderful",
+            "playground",
+            "exciting",
+            "butterfly",
+            "delicious",
+            "friendship",
+            "rainforest"
+        ];
+
+        // GAME STATE
+        let wordList = [];
+        let currentWordIndex = 0;
+        let isPlaying = false;
+        let isPaused = false;
+        let currentPhase = 'scrambled'; // 'scrambled' or 'correct'
+        let countdownSeconds = 10;
+        let phaseTimer = null;
+
+        // TIMING CONFIG (In Seconds)
+        let scrambleDuration = 3;
+        let correctDuration = 7;
+        let loopList = true;
+        let autoAdvance = true;
+
+        // AUDIO STATE
+        let bgmEnabled = false;
+        let bgmVolume = 0.3;
+        const bgmAudio = document.getElementById('bgm');
+
+        // INITIALIZATION
+        window.onload = function() {
+            loadSavedPreferences();
+            setupAudioHandlers();
+            renderCurrentWord();
+            updateUIState();
+        };
+
+        // LOCAL STORAGE MANAGEMENT
+        function loadSavedPreferences() {
+            // Words
+            const savedWords = localStorage.getItem('ws_words');
+            if (savedWords) {
+                try {
+                    wordList = JSON.parse(savedWords);
+                } catch(e) {
+                    wordList = [...DEFAULT_WORDS];
+                }
+            } else {
+                wordList = [...DEFAULT_WORDS];
+            }
+
+            // Timing Settings
+            scrambleDuration = parseInt(localStorage.getItem('ws_scramble_dur') || '3');
+            correctDuration = parseInt(localStorage.getItem('ws_correct_dur') || '7');
+            loopList = localStorage.getItem('ws_loop') !== 'false';
+            autoAdvance = localStorage.getItem('ws_auto') !== 'false';
+
+            // Audio Preferences
+            bgmVolume = parseFloat(localStorage.getItem('ws_volume') || '0.3');
+            bgmAudio.volume = bgmVolume;
+            document.getElementById('volumeSlider').value = bgmVolume;
+            document.getElementById('settingVolumeSlider').value = bgmVolume;
+            document.getElementById('volumePercent').innerText = Math.round(bgmVolume * 100) + '%';
+        }
+
+        function savePreferences() {
+            localStorage.setItem('ws_words', JSON.stringify(wordList));
+            localStorage.setItem('ws_scramble_dur', scrambleDuration);
+            localStorage.setItem('ws_correct_dur', correctDuration);
+            localStorage.setItem('ws_loop', loopList);
+            localStorage.setItem('ws_auto', autoAdvance);
+            localStorage.setItem('ws_volume', bgmVolume);
+        }
+
+        // AUDIO MANAGEMENT
+        function setupAudioHandlers() {
+            bgmAudio.addEventListener('error', function(e) {
+                console.warn("bgm.mp3 file missing or unplayable. Running in silent mode.");
+                document.getElementById('audioDiagnosticMsg').innerText = "bgm.mp3 not detected. Silent mode active.";
+                document.getElementById('audioDiagnosticMsg').classList.add("text-yellow-400");
+            });
+
+            bgmAudio.addEventListener('canplaythrough', function() {
+                document.getElementById('audioDiagnosticMsg').innerText = "bgm.mp3 loaded and ready!";
+                document.getElementById('audioDiagnosticMsg').classList.add("text-green-400");
+            });
+        }
+
+        function toggleBGM() {
+            if (bgmEnabled) {
+                disableBGM();
+            } else {
+                enableBGM();
+            }
+        }
+
+        function enableBGM() {
+            bgmAudio.play().then(() => {
+                bgmEnabled = true;
+                updateBGMUI();
+                showToast("Background music ON 🎵", "fa-music");
+            }).catch(err => {
+                console.warn("Autoplay blocked or audio missing:", err);
+                showToast("Click again or check bgm.mp3 file", "fa-triangle-exclamation");
+                bgmEnabled = false;
+                updateBGMUI();
+            });
+        }
+
+        function disableBGM() {
+            bgmAudio.pause();
+            bgmEnabled = false;
+            updateBGMUI();
+            showToast("Background music OFF 🔇", "fa-volume-xmark");
+        }
+
+        function updateBGMUI() {
+            const btnText = document.getElementById('bgmStatusText');
+            const icon = document.getElementById('bgmIcon');
+            if (bgmEnabled) {
+                btnText.innerText = "ON";
+                icon.className = "fa-solid fa-music text-pink-400 animate-bounce";
+            } else {
+                btnText.innerText = "OFF";
+                icon.className = "fa-solid fa-volume-xmark text-purple-400";
+            }
+        }
+
+        function adjustVolume(val) {
+            bgmVolume = parseFloat(val);
+            bgmAudio.volume = bgmVolume;
+            document.getElementById('volumeSlider').value = bgmVolume;
+            document.getElementById('settingVolumeSlider').value = bgmVolume;
+            document.getElementById('volumePercent').innerText = Math.round(bgmVolume * 100) + '%';
+            localStorage.setItem('ws_volume', bgmVolume);
+        }
+
+        // WORD SCRAMBLING ALGORITHM
+        function scrambleWord(word) {
+            if (!word) return "";
+            const cleanWord = word.trim();
+            if (cleanWord.length <= 2) return cleanWord;
+
+            let letters = cleanWord.split('');
+            let scrambled = cleanWord;
+            let attempts = 0;
+
+            // Ensure scrambled string isn't identical to clean word unless length <= 2
+            while (scrambled === cleanWord && attempts < 15) {
+                for (let i = letters.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [letters[i], letters[j]] = [letters[j], letters[i]];
+                }
+                scrambled = letters.join('');
+                attempts++;
+            }
+            return scrambled;
+        }
+
+        // WORD RENDERER
+        function renderCurrentWord() {
+            if (wordList.length === 0) {
+                document.getElementById('scrambledContainer').innerHTML = `<span class="text-purple-300 italic">No words available. Add words in Teacher Settings!</span>`;
+                document.getElementById('correctContainer').innerHTML = `<span class="text-purple-300 italic">No words available</span>`;
+                document.getElementById('wordProgressText').innerText = "0 of 0";
+                return;
+            }
+
+            const rawWord = wordList[currentWordIndex] || "";
+            const scrambledStr = scrambleWord(rawWord);
+
+            // Scrambled Display
+            const scrambledContainer = document.getElementById('scrambledContainer');
+            scrambledContainer.innerHTML = '';
+            
+            scrambledStr.split('').forEach((char, idx) => {
+                if (char === ' ') {
+                    const spaceSpan = document.createElement('span');
+                    spaceSpan.className = 'w-4 sm:w-8';
+                    scrambledContainer.appendChild(spaceSpan);
+                    return;
+                }
+                const letterEl = document.createElement('span');
+                const colorIdx = idx % 6;
+                letterEl.className = `bubble-letter text-3xl sm:text-5xl md:text-6xl letter-color-${colorIdx} animate-pop`;
+                if (isPlaying && currentPhase === 'scrambled' && !isPaused) {
+                    letterEl.classList.add('animate-bounce-letter');
+                    letterEl.style.animationDelay = `${(idx * 0.08).toFixed(2)}s`;
+                }
+                letterEl.innerText = char;
+                scrambledContainer.appendChild(letterEl);
+            });
+
+            // Correct Display
+            const correctContainer = document.getElementById('correctContainer');
+            correctContainer.innerHTML = '';
+
+            if (currentPhase === 'correct' || !isPlaying) {
+                rawWord.split('').forEach((char, idx) => {
+                    if (char === ' ') {
+                        const spaceSpan = document.createElement('span');
+                        spaceSpan.className = 'w-4 sm:w-8';
+                        correctContainer.appendChild(spaceSpan);
+                        return;
+                    }
+                    const letterEl = document.createElement('span');
+                    letterEl.className = 'bubble-letter text-3xl sm:text-5xl md:text-6xl letter-correct animate-pop';
+                    letterEl.style.animationDelay = `${(idx * 0.05).toFixed(2)}s`;
+                    letterEl.innerText = char;
+                    correctContainer.appendChild(letterEl);
+                });
+            } else {
+                // Placeholder question marks during scramble phase
+                rawWord.split('').forEach((char) => {
+                    if (char === ' ') {
+                        const spaceSpan = document.createElement('span');
+                        spaceSpan.className = 'w-4 sm:w-8';
+                        correctContainer.appendChild(spaceSpan);
+                        return;
+                    }
+                    const qEl = document.createElement('span');
+                    qEl.className = 'bubble-letter text-3xl sm:text-5xl md:text-6xl text-purple-700/60';
+                    qEl.innerText = '?';
+                    correctContainer.appendChild(qEl);
+                });
+            }
+
+            // Update Header Timer & Progress Text
+            document.getElementById('wordProgressText').innerText = `Word ${currentWordIndex + 1} of ${wordList.length}`;
+            updateTimerDisplay();
+        }
+
+        // TIMER & AUTOMATIC PROGRESSION ENGINE
+        function startGame() {
+            if (wordList.length === 0) {
+                openSettingsModal();
+                showToast("Please add vocabulary words first!", "fa-triangle-exclamation");
+                return;
+            }
+
+            isPlaying = true;
+            isPaused = false;
+            currentPhase = 'scrambled';
+            countdownSeconds = scrambleDuration;
+
+            // Prompt music play if user hasn't enabled yet
+            if (!bgmEnabled) {
+                enableBGM();
+            }
+
+            startTimer();
+            renderCurrentWord();
+            updateUIState();
+        }
+
+        function startTimer() {
+            clearInterval(phaseTimer);
+            phaseTimer = setInterval(() => {
+                if (isPaused) return;
+
+                countdownSeconds--;
+                updateTimerDisplay();
+
+                if (countdownSeconds <= 0) {
+                    if (currentPhase === 'scrambled') {
+                        // Switch to Correct Phase
+                        currentPhase = 'correct';
+                        countdownSeconds = correctDuration;
+                        renderCurrentWord();
+                    } else {
+                        // Proceed to Next Word
+                        if (currentWordIndex < wordList.length - 1) {
+                            currentWordIndex++;
+                            currentPhase = 'scrambled';
+                            countdownSeconds = scrambleDuration;
+                            renderCurrentWord();
+                        } else {
+                            // Reached end of word list
+                            if (loopList) {
+                                currentWordIndex = 0;
+                                currentPhase = 'scrambled';
+                                countdownSeconds = scrambleDuration;
+                                renderCurrentWord();
+                            } else {
+                                // Round Complete
+                                stopGame();
+                                showToast("✨ ROUND COMPLETE! ✨", "fa-trophy");
+                            }
+                        }
+                    }
+                }
+            }, 1000);
+        }
+
+        function togglePause() {
+            if (!isPlaying) return;
+            isPaused = !isPaused;
+            updateUIState();
+            renderCurrentWord();
+        }
+
+        function restartGame() {
+            currentWordIndex = 0;
+            if (isPlaying) {
+                startGame();
+            } else {
+                currentPhase = 'scrambled';
+                countdownSeconds = scrambleDuration;
+                renderCurrentWord();
+            }
+            showToast("Restarted from Word 1", "fa-rotate-right");
+        }
+
+        function stopGame() {
+            isPlaying = false;
+            isPaused = false;
+            clearInterval(phaseTimer);
+            updateUIState();
+        }
+
+        function prevWord() {
+            if (wordList.length === 0) return;
+            if (currentWordIndex > 0) {
+                currentWordIndex--;
+            } else {
+                currentWordIndex = wordList.length - 1;
+            }
+            resetWordPhase();
+        }
+
+        function nextWord() {
+            if (wordList.length === 0) return;
+            if (currentWordIndex < wordList.length - 1) {
+                currentWordIndex++;
+            } else {
+                currentWordIndex = 0;
+            }
+            resetWordPhase();
+        }
+
+        function resetWordPhase() {
+            currentPhase = 'scrambled';
+            countdownSeconds = scrambleDuration;
+            renderCurrentWord();
+            if (isPlaying && !isPaused) {
+                startTimer();
+            }
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            const totalRemaining = countdownSeconds;
+            const mins = Math.floor(totalRemaining / 60);
+            const secs = totalRemaining % 60;
+            display.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateUIState() {
+            const pauseLabel = document.getElementById('pauseLabel');
+            const pauseIcon = document.getElementById('pauseIcon');
+
+            if (isPaused) {
+                pauseLabel.innerText = "RESUME";
+                pauseIcon.className = "fa-solid fa-play text-lg md:text-xl";
+            } else {
+                pauseLabel.innerText = "PAUSE";
+                pauseIcon.className = "fa-solid fa-pause text-lg md:text-xl";
+            }
+        }
+
+        // FULLSCREEN API
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showToast("Fullscreen non-supported", "fa-exclamation");
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // TEACHER SETTINGS MODAL & TABS
+        function openSettingsModal() {
+            populateModalList();
+            document.getElementById('scrambleTimeInput').value = scrambleDuration;
+            document.getElementById('correctTimeInput').value = correctDuration;
+            document.getElementById('loopToggle').checked = loopList;
+            document.getElementById('autoAdvanceToggle').checked = autoAdvance;
+            
+            document.getElementById('settingsModal').classList.remove('hidden');
+            switchTab('edit');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function openSettingsTab(tabName) {
+            openSettingsModal();
+            switchTab(tabName);
+        }
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('text-cyan-300', 'border-cyan-400');
+                el.classList.add('text-purple-300', 'border-transparent');
+            });
+
+            // Show selected
+            const activeContent = document.getElementById(`tabContent-${tabName}`);
+            const activeBtn = document.getElementById(`tabBtn-${tabName}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.classList.remove('text-purple-300', 'border-transparent');
+                activeBtn.classList.add('text-cyan-300', 'border-cyan-400');
+            }
+        }
+
+        function populateModalList() {
+            const container = document.getElementById('modalWordList');
+            container.innerHTML = '';
+
+            if (wordList.length === 0) {
+                container.innerHTML = `<div class="text-center py-4 text-purple-400 text-xs">No words in list. Add one above!</div>`;
+                return;
+            }
+
+            wordList.forEach((word, idx) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between py-2 px-1 text-sm';
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-mono text-xs text-purple-400 w-5">${idx + 1}.</span>
+                        <input type="text" value="${word}" onchange="editWordInline(${idx}, this.value)" class="bg-[#100821] border border-purple-500/30 rounded px-2 py-1 text-white font-bold text-xs focus:border-cyan-400 focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="moveWord(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30 p-1"' : 'class="p-1 text-purple-300 hover:text-cyan-300"'}>
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </button>
+                        <button onclick="moveWord(${idx}, 1)" ${idx === wordList.length - 1 ? 'disabled class="opacity-30 p-1"' : 'class="p-1 text-purple-300 hover:text-cyan-300"'}>
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                        <button onclick="removeWord(${idx})" class="p-1 text-red-400 hover:text-red-200 ml-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addSingleWord() {
+            const input = document.getElementById('newWordInput');
+            const val = input.value.trim();
+            if (val) {
+                wordList.push(val);
+                input.value = '';
+                populateModalList();
+                showToast(`Added "${val}"`, "fa-plus");
+            }
+        }
+
+        function editWordInline(idx, newVal) {
+            const trimmed = newVal.trim();
+            if (trimmed) {
+                wordList[idx] = trimmed;
+            }
+        }
+
+        function removeWord(idx) {
+            wordList.splice(idx, 1);
+            if (currentWordIndex >= wordList.length && wordList.length > 0) {
+                currentWordIndex = wordList.length - 1;
+            }
+            populateModalList();
+        }
+
+        function moveWord(idx, direction) {
+            const targetIdx = idx + direction;
+            if (targetIdx >= 0 && targetIdx < wordList.length) {
+                const temp = wordList[idx];
+                wordList[idx] = wordList[targetIdx];
+                wordList[targetIdx] = temp;
+                populateModalList();
+            }
+        }
+
+        function processBulkImport() {
+            const rawText = document.getElementById('bulkInput').value;
+            const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length > 0) {
+                wordList = lines;
+                currentWordIndex = 0;
+                populateModalList();
+                switchTab('edit');
+                showToast(`Imported ${lines.length} words!`, "fa-file-import");
+            } else {
+                showToast("Please enter at least one word", "fa-exclamation");
+            }
+        }
+
+        function restoreDefaultWords() {
+            wordList = [...DEFAULT_WORDS];
+            currentWordIndex = 0;
+            populateModalList();
+            showToast("Restored sample words!", "fa-rotate-left");
+        }
+
+        function confirmClearWords() {
+            if (confirm("Are you sure you want to clear all words?")) {
+                wordList = [];
+                currentWordIndex = 0;
+                populateModalList();
+                showToast("Cleared word list", "fa-trash");
+            }
+        }
+
+        function saveSettingsModal() {
+            scrambleDuration = parseInt(document.getElementById('scrambleTimeInput').value) || 3;
+            correctDuration = parseInt(document.getElementById('correctTimeInput').value) || 7;
+            loopList = document.getElementById('loopToggle').checked;
+            autoAdvance = document.getElementById('autoAdvanceToggle').checked;
+
+            savePreferences();
+            renderCurrentWord();
+            closeSettingsModal();
+            saveAndToast();
+        }
+
+        function saveAndToast() {
+            savePreferences();
+            showToast("Settings & Words Saved!", "fa-floppy-disk");
+        }
+
+        // TOAST NOTIFICATION UTILITY
+        function showToast(message, iconClass = "fa-circle-check") {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMsg');
+            const icon = document.getElementById('toastIcon');
+
+            msg.innerText = message;
+            icon.className = `fa-solid ${iconClass} text-pink-400 text-lg`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
